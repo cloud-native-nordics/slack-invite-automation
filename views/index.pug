@@ -10,6 +10,7 @@ html
     #wrapper
       .main
         .header
+          img(src="https://raw.githubusercontent.com/cncf/artwork/master/cncf/icon/white/cncf-icon-white.png" width="15%" style="display: block; margin-left: auto; margin-right: auto;")
           h1
             strong #{community}
           h2 #{__('HEADER', community)}
@@ -17,6 +18,8 @@ html
           .information
             form(method="POST", action="invite")#join-form.form
               input(type="email", name="email", autofocus, placeholder=__('ENTER_EMAIL'))#slack-email.field
+              img.center-block(src="https://www.cloudnativenordics.com/badge.svg?colorA=000000&colorB=423e3e" style="display: block; margin-left: auto; margin-right: auto;")
+              a(href='https://github.com/cloud-native-nordics' style="display: block; margin-left: auto; margin-right: auto; text-align: center; margin-top:30px; color: white;") github.com
               if tokenRequired
                 input(type="text", name="token", placeholder=__('ENTER_TOKEN'))#slack-token.field
               input(type="submit", value="Join").submit
