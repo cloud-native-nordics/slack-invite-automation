@@ -7,57 +7,64 @@ const { badge } = require('../lib/badge');
 
 const sanitize = require('sanitize');
 
-router.get('/', function(req, res) {
+// set up a route to redirect http to https
+http.get('*', function (req, res) {
+  res.redirect('https://' + req.headers.host + req.url);
+})
+
+router.get('/', function (req, res) {
   res.setLocale(config.locale);
-  res.render('index', { community: config.community,
-                        tokenRequired: !!config.inviteToken,
-                        recaptchaSiteKey: config.recaptchaSiteKey });
+  res.render('index', {
+    community: config.community,
+    tokenRequired: !!config.inviteToken,
+    recaptchaSiteKey: config.recaptchaSiteKey
+  });
 });
 
-router.post('/invite', function(req, res) {
+router.post('/invite', function (req, res) {
   if (req.body.email && (!config.inviteToken || (!!config.inviteToken && req.body.token === config.inviteToken))) {
     function doInvite() {
       request.post({
-          url: 'https://'+ config.slackUrl + '/api/users.admin.invite',
-          form: {
-            email: req.body.email,
-            token: config.slacktoken,
-            set_active: true
-          }
-        }, function(err, httpResponse, body) {
-          // body looks like:
-          //   {"ok":true}
-          //       or
-          //   {"ok":false,"error":"already_invited"}
-          if (err) { return res.send('Error:' + err); }
-          body = JSON.parse(body);
-          if (body.ok) {
+        url: 'https://' + config.slackUrl + '/api/users.admin.invite',
+        form: {
+          email: req.body.email,
+          token: config.slacktoken,
+          set_active: true
+        }
+      }, function (err, httpResponse, body) {
+        // body looks like:
+        //   {"ok":true}
+        //       or
+        //   {"ok":false,"error":"already_invited"}
+        if (err) { return res.send('Error:' + err); }
+        body = JSON.parse(body);
+        if (body.ok) {
+          res.render('result', {
+            community: config.community,
+            message: 'Success! Check &ldquo;' + req.body.email + '&rdquo; for an invite from Slack.'
+          });
+        } else {
+          let error = body.error;
+          if (error === 'already_invited' || error === 'already_in_team') {
             res.render('result', {
               community: config.community,
-              message: 'Success! Check &ldquo;'+ req.body.email +'&rdquo; for an invite from Slack.'
+              message: 'Success! You were already invited.<br>' +
+                'Visit <a href="https://' + config.slackUrl + '">' + config.community + '</a>'
             });
-          } else {
-            let error = body.error;
-            if (error === 'already_invited' || error === 'already_in_team') {
-              res.render('result', {
-                community: config.community,
-                message: 'Success! You were already invited.<br>' +
-                        'Visit <a href="https://'+ config.slackUrl +'">'+ config.community +'</a>'
-              });
-              return;
-            } else if (error === 'invalid_email') {
-              error = 'The email you entered is an invalid email.';
-            } else if (error === 'invalid_auth') {
-              error = 'Something has gone wrong. Please contact a system administrator.';
-            }
+            return;
+          } else if (error === 'invalid_email') {
+            error = 'The email you entered is an invalid email.';
+          } else if (error === 'invalid_auth') {
+            error = 'Something has gone wrong. Please contact a system administrator.';
+          }
 
-            res.render('result', {
-              community: config.community,
-              message: 'Failed! ' + error,
-              isFailed: true
-            });
-          }
-        });
+          res.render('result', {
+            community: config.community,
+            message: 'Failed! ' + error,
+            isFailed: true
+          });
+        }
+      });
     }
     if (!!config.recaptchaSiteKey && !!config.recaptchaSecretKey) {
       request.post({
@@ -66,7 +73,7 @@ router.post('/invite', function(req, res) {
           response: req.body['g-recaptcha-response'],
           secret: config.recaptchaSecretKey
         }
-      }, function(err, httpResponse, body) {
+      }, function (err, httpResponse, body) {
         if (typeof body === "string") {
           body = JSON.parse(body);
         }
@@ -111,26 +118,26 @@ router.post('/invite', function(req, res) {
 
 router.get('/badge.svg', (req, res) => {
   request.get({
-    url: 'https://'+ config.slackUrl + '/api/users.list',
+    url: 'https://' + config.slackUrl + '/api/users.list',
     qs: {
       token: config.slacktoken,
       presence: true
     }
-  }, function(err, httpResponse, body) {
+  }, function (err, httpResponse, body) {
     try {
       body = JSON.parse(body);
-    } catch(e) {
+    } catch (e) {
       return res.status(404).send('');
     }
     if (!body.members) {
       return res.status(404).send('');
     }
 
-    const members = body.members.filter(function(m) {
+    const members = body.members.filter(function (m) {
       return !m.is_bot;
     });
     const total = members.length;
-    const presence = members.filter(function(m) {
+    const presence = members.filter(function (m) {
       return m.presence === 'active';
     }).length;
 
@@ -141,12 +148,12 @@ router.get('/badge.svg', (req, res) => {
     res.set('Cache-Control', 'max-age=0, no-cache');
     res.set('Pragma', 'no-cache');
     res.send(
-        badge(
-            presence,
-            total,
-            req.queryPattern('colorA', hexColor),
-            req.queryPattern('colorB', hexColor)
-        )
+      badge(
+        presence,
+        total,
+        req.queryPattern('colorA', hexColor),
+        req.queryPattern('colorB', hexColor)
+      )
     );
   });
 });
