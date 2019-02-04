@@ -8,7 +8,7 @@ const { badge } = require('../lib/badge');
 const sanitize = require('sanitize');
 
 // set up a route to redirect http to https
-http.get('*', function (req, res) {
+router.get('*', function (req, res) {
   res.redirect('https://' + req.headers.host + req.url);
 })
 
