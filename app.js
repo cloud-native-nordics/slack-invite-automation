@@ -12,6 +12,7 @@ const routes = require('./routes/index');
 
 const app = express();
 
+app.use(sslRedirect());
 
 i18n.configure({
     defaultLocale: "en",
