@@ -12,26 +12,6 @@ const routes = require('./routes/index');
 
 const app = express();
 
-app.set('sslPort', 443);
-
-//For redirecting to https
-app.use(function (req, res, next) {
-    // Checking for secure connection or not
-    // If not secure redirect to the secure connection
-    if (!req.secure) {
-        //This should work for local development as well
-        var host = req.get('host');
-
-        // replace the port in the host
-        host = host.replace(/:\d+$/, ":" + app.get('sslPort'));
-
-        // determine the redirect destination
-        var destination = ['https://', host, req.url].join('');
-
-        return res.redirect(destination);
-    }
-    next();
-});
 
 i18n.configure({
     defaultLocale: "en",
