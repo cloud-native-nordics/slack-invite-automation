@@ -7,10 +7,6 @@ const { badge } = require('../lib/badge');
 
 const sanitize = require('sanitize');
 
-// set up a route to redirect http to https
-router.get('*', function (req, res) {
-  res.redirect('https://' + req.headers.host + req.url);
-})
 
 router.get('/', function (req, res) {
   res.setLocale(config.locale);
