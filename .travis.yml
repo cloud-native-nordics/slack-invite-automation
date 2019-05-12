@@ -6,4 +6,4 @@ services: docker
 
 install:
   - docker build -t cloudnativenordics/slack-invite-automation .
-  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
