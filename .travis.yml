@@ -1,8 +1,9 @@
 sudo: required
 language: node_js
 node_js:
-- '8'
+  - '8'
+services: docker
 
 install:
-- npm install
-
+  - docker build -t cloudnativenordics/slack-invite-automation .
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
